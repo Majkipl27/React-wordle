@@ -4,8 +4,7 @@ import { Outlet } from "react-router-dom";
 export default function Header(): JSX.Element {
   return (
     <>
-      <header className="prose max-w-none flex justify-between items-center py-4 px-8">
-        <h2 className="text-foreground mb-0">App name</h2>
+      <header className="prose max-w-none flex justify-end items-center py-4 px-8">
         <ModeToggle />
       </header>
       <Outlet />
