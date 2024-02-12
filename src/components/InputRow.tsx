@@ -1,7 +1,6 @@
 import { guessWordAtom, wordsAtom } from "@/atoms";
 import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 export default function InputRow({
   isEnabled,
@@ -40,16 +39,24 @@ export default function InputRow({
   }
 
   function incrementTry() {
-    if (!isEnabled) return;
-    if (currentTry >= 6 || letters.filter((l) => l === "").length > 0) return;
+    if (
+      currentTry >= 6 ||
+      letters.filter((l) => l === "").length > 0 ||
+      !isEnabled
+    )
+      return;
+
     const word = letters.join("");
-    if (words.includes(word)) {
-      if (word === guessWord) {
-        alert(`You won! The word was indeed ${guessWord.toUpperCase()}`);
-        setCurrentTry(69);
-        setLettersWithSignatures(letters.map((l) => `GP-${l}`));
-        return;
-      }
+
+    if (!words.includes(word)) {
+      return;
+    }
+
+    if (word === guessWord) {
+      alert(`You won! The word was indeed ${word}!`);
+      setCurrentTry(69);
+      setLettersWithSignatures(letters.map((l) => `GP-${l}`));
+    } else {
       const lettersCopy = [...letters];
       letters.forEach((w, i) => {
         if (guessWord.includes(w)) {
@@ -62,8 +69,6 @@ export default function InputRow({
       });
       setLettersWithSignatures(lettersCopy);
       setCurrentTry(currentTry + 1);
-    } else {
-      toast.error(`${word.toUpperCase()} is not a valid word!`);
     }
   }
 
@@ -94,18 +99,20 @@ export default function InputRow({
         }
       });
     };
-  }, [letters, isEnabled, currentTry]);
+  }, [letters, isEnabled]);
 
   return (
     <>
       {letters.map((letter, i) => (
         <div
-          key={Math.random()}
-          className={`flex flex-col justify-center items-center rounded-lg text-xl w-full h-full border-2 uppercase ${
+          key={`${currentTry}${i}`}
+          className={`flex flex-col justify-center items-center rounded-lg text-xl w-full h-full border-2 uppercase transition-colors ${
             lettersWithSignatures[i] === `GP-${letter}`
-              ? "border-green-500"
+              ? "border-green-500 bg-green-700 text-white"
               : lettersWithSignatures[i] === `WP-${letter}`
-              ? "border-yellow-500"
+              ? "border-yellow-500 bg-yellow-700 text-white"
+              : isEnabled
+              ? "border-gray-600"
               : "border-border"
           }`}
         >

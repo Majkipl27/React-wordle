@@ -3,13 +3,13 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import words from "../assets/words.txt";
 import { guessWordAtom, wordsAtom } from "@/atoms";
-import { useSetAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { Separator } from "@/components/ui/separator";
 
 export default function Play(): JSX.Element {
   const [currentTry, setCurrentTry] = useState<number>(0);
   const setWords = useSetAtom(wordsAtom);
-  const setGuessWord = useSetAtom(guessWordAtom);
+  const [guessWord, setGuessWord] = useAtom(guessWordAtom);
 
   useEffect(() => {
     async function fetchWords() {
@@ -20,14 +20,19 @@ export default function Play(): JSX.Element {
           words.pop();
           const randomIndex = Math.floor(Math.random() * words.length);
           setGuessWord(words[randomIndex]);
-          console.log(words[randomIndex]);
           setWords(words);
         });
     }
 
     fetchWords();
-
   }, []);
+
+  useEffect(() => {
+    if (currentTry === 6) {
+      alert(`You lost! The word was ${guessWord}`);
+      setCurrentTry(69);
+    }
+  }, [currentTry, guessWord]);
 
   return (
     <motion.div
@@ -40,7 +45,7 @@ export default function Play(): JSX.Element {
       <h1 className="text-5xl tracking-tighter font-bold text-secondary-foreground">
         Wordle
       </h1>
-      <Separator orientation="horizontal" className="w-1/4"/>
+      <Separator orientation="horizontal" className="w-1/4" />
       <div className="grid grid-cols-5 grid-rows-6 gap-2 w-1/4 h-2/3">
         {Array.from({ length: 6 }).map((_, i) => (
           <InputRow

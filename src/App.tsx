@@ -5,7 +5,6 @@ import { cloneElement } from "react";
 import LandingPage from "./Pages/LandingPage";
 import { AnimatePresence } from "framer-motion";
 import Play from "./Pages/Play";
-import { Toaster } from "./components/ui/sonner";
 
 export default function App(): JSX.Element | null {
   const element = useRoutes([
@@ -28,7 +27,6 @@ export default function App(): JSX.Element | null {
   return (
     <ThemeProvider>
       <AnimatePresence mode="wait">
-        <Toaster />
         {cloneElement(element, { key: location.pathname })}
       </AnimatePresence>
     </ThemeProvider>
