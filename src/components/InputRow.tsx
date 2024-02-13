@@ -1,39 +1,39 @@
-import { guessWordAtom, wordsAtom } from "@/atoms";
-import { useAtomValue } from "jotai";
+import {
+  currentTryAtom,
+  guessWordAtom,
+  lettersAtom,
+  lettersWithSignaturesAtom,
+  wordsAtom,
+} from "@/atoms";
+import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 
-export default function InputRow({
-  isEnabled,
-  setCurrentTry,
-  currentTry,
-}: {
-  isEnabled: boolean;
-  setCurrentTry: React.Dispatch<React.SetStateAction<number>>;
-  currentTry: number;
-}): JSX.Element {
-  const [letters, setLetters] = useState<string[]>(["", "", "", "", ""]);
-  const [lettersWithSignatures, setLettersWithSignatures] = useState<string[]>(
-    []
-  );
+export default function InputRow({ index }: { index: number }): JSX.Element {
   const guessWord = useAtomValue(guessWordAtom);
+  const [letters, setLetters] = useAtom(lettersAtom);
+  const [currentTry, setCurrentTry] = useAtom(currentTryAtom);
+  const [isEnabled, setIsEnabled] = useState(currentTry === index);
   const words = useAtomValue(wordsAtom);
+  const [lettersWithSignatures, setLettersWithSignatures] = useAtom(
+    lettersWithSignaturesAtom
+  );
 
   function handleAddLetter(letter: string) {
-    const emptyLetters = letters.filter((l) => l === "");
+    const emptyLetters = letters[index].filter((l) => l === "");
     if (emptyLetters.length === 0) return;
     setLetters((prev) => {
       const copy = [...prev];
-      copy[copy.length - emptyLetters.length] = letter;
+      copy[index][5 - emptyLetters.length] = letter;
       return copy;
     });
   }
 
   function handleRemoveLetter() {
-    const emptyLetters = letters.filter((l) => l === "");
+    const emptyLetters = letters[index].filter((l) => l === "");
     if (emptyLetters.length === 5) return;
     setLetters((prev) => {
       const copy = [...prev];
-      copy[copy.length - emptyLetters.length - 1] = "";
+      copy[index][4 - emptyLetters.length] = "";
       return copy;
     });
   }
@@ -41,33 +41,35 @@ export default function InputRow({
   function incrementTry() {
     if (
       currentTry >= 6 ||
-      letters.filter((l) => l === "").length > 0 ||
+      letters[index].filter((l) => l === "").length > 0 ||
       !isEnabled
     )
       return;
 
-    const word = letters.join("");
+    const word = letters[index].join("");
 
     if (!words.includes(word)) {
       return;
     }
 
     if (word === guessWord) {
-      alert(`You won! The word was indeed ${word}!`);
       setCurrentTry(69);
       setLettersWithSignatures(letters.map((l) => `GP-${l}`));
     } else {
-      const lettersCopy = [...letters];
-      letters.forEach((w, i) => {
+      const lettersCopy = [...letters][index];
+      letters[index].forEach((w, i) => {
         if (guessWord.includes(w)) {
           if (guessWord[i] === w) {
             lettersCopy[i] = `GP-${w}`;
           } else {
             lettersCopy[i] = `WP-${w}`;
           }
+        } else {
+          lettersCopy[i] = `NI-${w}`;
         }
       });
-      setLettersWithSignatures(lettersCopy);
+
+      setLettersWithSignatures([...lettersWithSignatures, ...lettersCopy]);
       setCurrentTry(currentTry + 1);
     }
   }
@@ -101,24 +103,32 @@ export default function InputRow({
     };
   }, [letters, isEnabled]);
 
+  useEffect(() => {
+    setIsEnabled(currentTry === index);
+  }, [currentTry]);
+
   return (
     <>
-      {letters.map((letter, i) => (
-        <div
-          key={`${currentTry}${i}`}
-          className={`flex flex-col justify-center items-center rounded-lg text-xl w-full h-full border-2 uppercase transition-colors ${
-            lettersWithSignatures[i] === `GP-${letter}`
-              ? "border-green-500 bg-green-700 text-white"
-              : lettersWithSignatures[i] === `WP-${letter}`
-              ? "border-yellow-500 bg-yellow-700 text-white"
-              : isEnabled
-              ? "border-gray-600"
-              : "border-border"
-          }`}
-        >
-          {letter}
-        </div>
-      ))}
+      {letters[index].map((letter, i) => {
+        return (
+          <div
+            key={`${currentTry}${i}`}
+            className={`flex flex-col justify-center items-center rounded-lg text-xl w-full h-full border-2 uppercase transition-colors ${
+              letter.startsWith("GP-")
+                ? "bg-green-500 text-white"
+                : letter.startsWith("WP-")
+                ? "bg-yellow-500 text-white"
+                : letter.startsWith("NI-")
+                ? "dark:bg-gray-600 bg-gray-400"
+                : isEnabled
+                ? "border-gray-600"
+                : ""
+            }`}
+          >
+            {letter.length === 1 ? letter : letter.substring(3, 4)}
+          </div>
+        );
+      })}
     </>
   );
 }

@@ -1,38 +1,65 @@
 import InputRow from "@/components/InputRow";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import words from "../assets/words.txt";
-import { guessWordAtom, wordsAtom } from "@/atoms";
-import { useAtom, useSetAtom } from "jotai";
+import {
+  currentTryAtom,
+  guessWordAtom,
+  lettersAtom,
+  lettersWithSignaturesAtom,
+  wordsAtom,
+} from "@/atoms";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { Separator } from "@/components/ui/separator";
+import Keyboard from "@/components/Keyboard";
+import wordsPath from "../assets/words.txt";
+import { Button } from "@/components/ui/button";
 
 export default function Play(): JSX.Element {
-  const [currentTry, setCurrentTry] = useState<number>(0);
+  const [currentTry, setCurrentTry] = useAtom(currentTryAtom);
+  const guessWord = useAtomValue(guessWordAtom);
   const setWords = useSetAtom(wordsAtom);
-  const [guessWord, setGuessWord] = useAtom(guessWordAtom);
+  const setGuessWord = useSetAtom(guessWordAtom);
+  const [hasGameEnded, setHasGameEnded] = useState<boolean>(false);
+  const setLetters = useSetAtom(lettersAtom);
+  const setLettersWithSignatures = useSetAtom(lettersWithSignaturesAtom);
 
   useEffect(() => {
     async function fetchWords() {
-      await fetch(words)
+      await fetch(wordsPath)
         .then((response) => response.text())
         .then((result) => {
           const words = result.split("\n");
           words.pop();
           const randomIndex = Math.floor(Math.random() * words.length);
           setGuessWord(words[randomIndex]);
+          console.log(words[randomIndex]);
           setWords(words);
         });
     }
 
     fetchWords();
+
+    setCurrentTry(0);
+    setLetters([
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""]
+    ]);
+    setLettersWithSignatures([]);
   }, []);
 
   useEffect(() => {
     if (currentTry === 6) {
-      alert(`You lost! The word was ${guessWord}`);
-      setCurrentTry(69);
+      alert(`You lost! The word was ${guessWord}.`);
+      setHasGameEnded(true);
+    } else if (currentTry === 69) {
+      alert(`You won! The word was indeed ${guessWord}!`);
+      setHasGameEnded(true);
     }
-  }, [currentTry, guessWord]);
+  }, [currentTry]);
 
   return (
     <motion.div
@@ -45,17 +72,23 @@ export default function Play(): JSX.Element {
       <h1 className="text-5xl tracking-tighter font-bold text-secondary-foreground">
         Wordle
       </h1>
-      <Separator orientation="horizontal" className="w-1/4" />
-      <div className="grid grid-cols-5 grid-rows-6 gap-2 w-1/4 h-2/3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <InputRow
-            key={i}
-            isEnabled={i === currentTry}
-            setCurrentTry={setCurrentTry}
-            currentTry={currentTry}
-          />
-        ))}
-      </div>
+      {hasGameEnded ? (
+        <div className="flex flex-col justify-center items-center gap-4">
+          <p>The game has ended. Click the button bellow to play again!</p>
+          <Button onClick={() => window.location.reload()}>Play again</Button>
+        </div>
+      ) : (
+        <>
+          <Separator orientation="horizontal" className="w-1/4" />
+          <div className="grid grid-cols-5 grid-rows-6 gap-2 w-1/4 h-2/3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <InputRow key={i} index={i} />
+            ))}
+          </div>
+          <Separator orientation="horizontal" className="w-1/4" />
+          <Keyboard />
+        </>
+      )}
     </motion.div>
   );
 }
