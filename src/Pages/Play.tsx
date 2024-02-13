@@ -32,7 +32,6 @@ export default function Play(): JSX.Element {
           words.pop();
           const randomIndex = Math.floor(Math.random() * words.length);
           setGuessWord(words[randomIndex]);
-          console.log(words[randomIndex]);
           setWords(words);
         });
     }
@@ -46,7 +45,7 @@ export default function Play(): JSX.Element {
       ["", "", "", "", ""],
       ["", "", "", "", ""],
       ["", "", "", "", ""],
-      ["", "", "", "", ""]
+      ["", "", "", "", ""],
     ]);
     setLettersWithSignatures([]);
   }, []);
@@ -67,25 +66,31 @@ export default function Play(): JSX.Element {
       animate={{ opacity: 1, transition: { duration: 0.5, delay: 0.5 } }}
       exit={{ opacity: 0, transition: { duration: 0.5 } }}
       key="play"
-      className="flex-1 flex flex-col justify-center items-center gap-4"
+      className="flex-1 flex flex-col justify-center items-center gap-4 overflow-y-auto py-8"
     >
       <h1 className="text-5xl tracking-tighter font-bold text-secondary-foreground">
         Wordle
       </h1>
       {hasGameEnded ? (
-        <div className="flex flex-col justify-center items-center gap-4">
+        <div className="flex flex-col justify-center items-center gap-4 text-center">
           <p>The game has ended. Click the button bellow to play again!</p>
           <Button onClick={() => window.location.reload()}>Play again</Button>
         </div>
       ) : (
         <>
-          <Separator orientation="horizontal" className="w-1/4" />
-          <div className="grid grid-cols-5 grid-rows-6 gap-2 w-1/4 h-2/3">
+          <Separator
+            orientation="horizontal"
+            className="xl:w-1/4 sm:w-2/3 w-full px-4"
+          />
+          <div className="grid grid-cols-5 grid-rows-6 gap-2 xl:w-1/4 sm:w-2/3 w-full px-4 xl:h-2/3 h-2/3">
             {Array.from({ length: 6 }).map((_, i) => (
               <InputRow key={i} index={i} />
             ))}
           </div>
-          <Separator orientation="horizontal" className="w-1/4" />
+          <Separator
+            orientation="horizontal"
+            className="xl:w-1/4 sm:w-2/3 w-full"
+          />
           <Keyboard />
         </>
       )}

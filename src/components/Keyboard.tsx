@@ -1,4 +1,3 @@
-import { ArrowLeftCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
 import {
@@ -103,12 +102,12 @@ export default function Keyboard(): JSX.Element {
   }
 
   return (
-    <div className="grid grid-cols-10 grid-rows-3 content-center gap-2">
-      {Array.from({ length: 10 }).map((_, i) => (
+    <div className="grid grid-cols-8 content-center gap-2 xl:w-1/4 sm:w-2/3 w-full px-4">
+      {Array.from({ length: 26 }).map((_, i) => (
         <Button
           key={i}
           variant="outline"
-          className={`w-10 h-10 rounded-lg ${letterClass(
+          className={`xl:h-10 h-8 w-full rounded-lg ${letterClass(
             String.fromCharCode(65 + i).toLowerCase()
           )}`}
           onClick={() => handleAddLetter(String.fromCharCode(65 + i))}
@@ -116,39 +115,15 @@ export default function Keyboard(): JSX.Element {
           {String.fromCharCode(65 + i)}
         </Button>
       ))}
-      {Array.from({ length: 8 }).map((_, i) => (
-        <Button
-          key={i}
-          variant="outline"
-          className={`w-10 h-10 rounded-lg ${letterClass(
-            String.fromCharCode(75 + i).toLowerCase()
-          )}`}
-          onClick={() => handleAddLetter(String.fromCharCode(75 + i))}
-        >
-          {String.fromCharCode(75 + i)}
-        </Button>
-      ))}
       <Button
         variant="destructive"
         onClick={handleRemoveLetter}
-        className="flex items-center justify-center col-span-2"
+        className="flex items-center justify-center col-start-3 col-span-3 xl:h-10 h-8"
       >
-        <ArrowLeftCircle />
+        DELETE
       </Button>
-      {Array.from({ length: 8 }).map((_, i) => (
-        <Button
-          key={i}
-          variant="outline"
-          className={`w-10 h-10 rounded-lg ${letterClass(
-            String.fromCharCode(83 + i).toLowerCase()
-          )}`}
-          onClick={() => handleAddLetter(String.fromCharCode(83 + i))}
-        >
-          {String.fromCharCode(83 + i)}
-        </Button>
-      ))}
       <Button
-        className="flex items-center justify-center col-span-2"
+        className="flex items-center justify-center col-start-6 col-span-3 xl:h-10 h-8"
         onClick={incrementTry}
       >
         ENTER
